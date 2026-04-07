@@ -1,12 +1,34 @@
+import os
+import discord
 import random
+import requests
+from discord.ext import commands
 
-characters = "+-/*!&$#?=@abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-pass_size = int(input("Ingrese la longitud de la contraseña"))
+intents = discord.Intents.default()
+intents.message_content = True
 
-password = ""
+bot = commands.Bot(command_prefix='$', intents=intents)
 
-for i in range (pass_size):
-    password += random.choice(characters)
-    
-print("Contraseña segura:")
-print(password)
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user}')
+
+@bot.command()
+async def mem(ctx):
+    img_name = random.choice(os.listdir('images'))
+    with open(f'images/{img_name}', 'rb') as f:
+        picture = discord.File(f)
+    await ctx.send(file=picture)
+
+def get_duck_image_url():    
+    url = 'https://random-d.uk/api/random'
+    res = requests.get(url)
+    data = res.json()
+    return data['url']
+
+@bot.command('duck')
+async def duck(ctx):
+    image_url = get_duck_image_url()
+    await ctx.send(image_url)
+
+bot.run("Tu token")
